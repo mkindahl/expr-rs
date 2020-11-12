@@ -1,6 +1,7 @@
 extern crate env_logger;
 #[macro_use]
 extern crate log;
+extern crate assert_matches;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -26,10 +27,26 @@ impl std::convert::From<tree::Error> for Error {
     }
 }
 
+impl std::error::Error for Error {
+    fn description(&self) -> &str {
+        match self {
+            Error::Parser(_) => "parser error",
+            Error::Eval(_) => "eval error",
+        }
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Error::Parser(ref err) => write!(f, "parse error: {}", err),
+            Error::Eval(ref err) => write!(f, "eval error: {}", err),
+        }
+    }
+}
+
 pub use self::parser::parse;
 
-use std::collections::HashMap;
-
-pub fn eval(expr: &str, map: &HashMap<String, f64>) -> Result<f64> {
+pub fn eval(expr: &str, map: &std::collections::HashMap<String, f64>) -> Result<f64> {
     parse(expr)?.eval(map).map_err(|err| err.into())
 }

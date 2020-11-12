@@ -46,6 +46,12 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
+    pub fn peek(&self, rule: &str) -> Option<Token> {
+        let tok = self.clone().next();
+        debug!("{}: next is {:?}", rule, tok);
+        tok
+    }
+
     #[allow(dead_code)]
     fn take(&mut self, count: usize) -> &'a str {
         let start = self.chars.as_str();
@@ -87,7 +93,7 @@ impl<'a> Iterator for Tokenizer<'a> {
             Some(ch) if ch.is_digit(10) => self
                 .take_while(|ch| ch.is_digit(10) || ch == '.')
                 .parse::<f64>()
-                .map(|num| Token::Float(num))
+                .map(Token::Float)
                 .ok(),
             Some(ch) if ch.is_alphabetic() => {
                 let name = self.take_while(|c| c.is_alphabetic() || c == '_' || c.is_digit(10));

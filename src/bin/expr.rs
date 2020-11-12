@@ -4,7 +4,7 @@ use expr::eval;
 use std::collections::HashMap;
 use std::env::args;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = args().collect::<Vec<String>>();
     if args.len() < 2 {
         println!("Usage: expr <expression> [ <variable>=<value> ... ]");
@@ -13,11 +13,9 @@ fn main() {
         let mut map = HashMap::new();
         for assign in &args[2..] {
             let parts: Vec<&str> = assign.splitn(2, '=').collect();
-            map.insert(
-                parts[0].to_string(),
-                parts[1].parse::<f64>().expect("expected number"),
-            );
+            map.insert(parts[0].to_string(), parts[1].parse::<f64>()?);
         }
-        println!("'{}' => {:?}", expr, eval(expr.as_str(), &map));
+        println!("{}", eval(expr.as_str(), &map)?);
     }
+    Ok(())
 }

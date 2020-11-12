@@ -1,5 +1,7 @@
+extern crate assert_matches;
 extern crate expr;
 
+use assert_matches::assert_matches;
 use expr::eval;
 use expr::parser::Error::*;
 use expr::tokens::Token;
@@ -31,33 +33,33 @@ fn bad_eval() {
         eval("10 + x + y", &map),
         Err(Eval(NoValue("y".to_string())))
     );
-    assert_eq!(
+    assert_matches!(
         eval("10 + ", &map),
-        Err(Parser(UnexpectedEndOfInput { rule: "factor" }))
+        Err(Parser(UnexpectedEndOfInput { rule: "factor", .. }))
     );
-    assert_eq!(
+    assert_matches!(
         eval("(10 + x", &map),
-        Err(Parser(UnexpectedEndOfInput { rule: "factor" }))
+        Err(Parser(UnexpectedEndOfInput { rule: "factor", .. }))
     );
-    assert_eq!(
+    assert_matches!(
         eval("((10 + x) * 2))", &map),
         Err(Parser(UnexpectedToken {
             token: Token::Close,
-            rule: "expr"
+            rule: "expr", ..
         }))
     );
-    assert_eq!(
+    assert_matches!(
         eval("x y", &map),
         Err(Parser(UnexpectedToken {
-            token: Token::Symbol("y".to_string()),
-            rule: "expr"
+            token: Token::Symbol(_),
+            rule: "expr", ..
         }))
     );
-    assert_eq!(
+    assert_matches!(
         eval(")10 + x", &map),
         Err(Parser(UnexpectedToken {
-            token: Token::Float(10.0),
-            rule: "expr"
+            token: Token::Float(_),
+            rule: "expr", ..
         }))
     );
 }

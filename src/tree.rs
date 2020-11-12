@@ -23,12 +23,20 @@ impl ExprTree {
             ExprTree::Float(num) => Ok(num),
             ExprTree::Var(name) => map
                 .get(&name)
-                .ok_or(Error::NoValue(name.clone()))
+                .ok_or_else(|| Error::NoValue(name.clone()))
                 .map(Clone::clone),
             ExprTree::Add(lhs, rhs) => Ok(lhs.eval(map)? + rhs.eval(map)?),
             ExprTree::Sub(lhs, rhs) => Ok(lhs.eval(map)? - rhs.eval(map)?),
             ExprTree::Mul(lhs, rhs) => Ok(lhs.eval(map)? * rhs.eval(map)?),
             ExprTree::Div(lhs, rhs) => Ok(lhs.eval(map)? / rhs.eval(map)?),
+        }
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Error::NoValue(name) => write!(f, "variable '{}' has no value", name),
         }
     }
 }

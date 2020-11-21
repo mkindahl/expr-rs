@@ -1,18 +1,19 @@
-# Recursive decent expression parser implemented in Rust
+# expr-rs: recursive decent expression parser
 
-This will allow parsing a string and evaluating it as an
-expression. It is implemented as a library so that it can be embedded
-into other applications and only has dependencies on the standard
-library to be as lightweight as possible.
+An implementation of an simple expression parser with a focus on being
+fast, simple to embed, and with a minimum of dependencies. The parser
+reads a string to build an expression tree. The tree can then be
+evaluated or inspected or manipulated.
 
 The grammar of expressions is straightforward:
 
     expr   ::= `term` (("+" | "-") `term`)*
     term   ::= `factor` (("*" | "/") `factor`)*
-    factor ::= `number` | `variable` | "(" `expr` ")"
+    factor ::= ("+" | "-")? (`number` | `variable` | "(" `expr` ")")
 
-The parser is implemented as a predictive parser, handles variables,
-and embedding the parser into a program is straightforward.
+The parser is implemented as a library to ensure that it can easily be
+embedded into other applications and only has dependencies on the
+standard library to be as lightweight as possible.
 
 ```rust
  use expr::parse;

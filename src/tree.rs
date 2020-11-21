@@ -11,6 +11,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum ExprTree {
     Var(String),
     Float(f64),
+    Neg(Box<ExprTree>),
     Add(Box<ExprTree>, Box<ExprTree>),
     Sub(Box<ExprTree>, Box<ExprTree>),
     Mul(Box<ExprTree>, Box<ExprTree>),
@@ -25,6 +26,7 @@ impl ExprTree {
                 .get(&name)
                 .ok_or_else(|| Error::NoValue(name.clone()))
                 .map(Clone::clone),
+            ExprTree::Neg(expr) => Ok(-expr.eval(map)?),
             ExprTree::Add(lhs, rhs) => Ok(lhs.eval(map)? + rhs.eval(map)?),
             ExprTree::Sub(lhs, rhs) => Ok(lhs.eval(map)? - rhs.eval(map)?),
             ExprTree::Mul(lhs, rhs) => Ok(lhs.eval(map)? * rhs.eval(map)?),

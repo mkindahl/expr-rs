@@ -10,7 +10,7 @@ use tree::ExprTree;
 ///
 /// expr ::= term (("+" | "-") term)*
 /// term ::= factor (("*" | "/") factor)*
-/// factor ::= number | variable | "(" expr ")"
+/// factor ::= ("-" | "+")? (number | variable | "(" expr ")")
 ///
 /// # Returns
 ///
@@ -27,7 +27,6 @@ use tree::ExprTree;
 /// assert_eq!(tree.eval(&map), Ok(22.0));
 /// ```
 pub fn parse(text: &str) -> Result<ExprTree> {
-    debug!("Starting parse");
     let mut tokens = Tokenizer::new(text);
     let tree = expr_rule(&mut tokens);
     let result = match tokens.next() {
@@ -38,16 +37,13 @@ pub fn parse(text: &str) -> Result<ExprTree> {
             expect: "end of input",
         }),
     };
-    debug!("Exiting parse: {:?}", result);
     result
 }
 
 fn expr_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
-    debug!("expr: enter");
     let mut tree = term_rule(tokens)?;
     while let Some(Token::Plus) | Some(Token::Minus) = tokens.peek("expr") {
         let tok = tokens.next();
-        debug!("expr: read {:?}", tok);
         let rhs = term_rule(tokens)?;
         match tok {
             Some(Token::Plus) => {
@@ -71,16 +67,13 @@ fn expr_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
             }
         }
     }
-    debug!("expr: leave");
     Ok(tree)
 }
 
 fn term_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
-    debug!("term: enter");
     let mut tree = factor_rule(tokens)?;
     while let Some(Token::Star) | Some(Token::Slash) = tokens.peek("term") {
         let tok = tokens.next();
-        debug!("term: read {:?}", tok);
         let rhs = factor_rule(tokens)?;
         match tok {
             Some(Token::Star) => {
@@ -104,46 +97,68 @@ fn term_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
             }
         }
     }
-    debug!("term: leave");
     Ok(tree)
 }
 
 fn factor_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
-    debug!("factor: enter");
-    let result = {
-        let tok = tokens.next();
-        debug!("factor: read {:?}", tok);
-        match tok {
-            Some(Token::Float(number)) => Ok(ExprTree::Float(number)),
-            Some(Token::Symbol(name)) => Ok(ExprTree::Var(name)),
-            Some(Token::Open) => {
-                let expr = expr_rule(tokens)?;
-                match tokens.next() {
-                    Some(Token::Close) => Ok(expr),
-                    Some(tok) => Err(Error::UnexpectedToken {
+    let tok = tokens.next();
+    let mut negate = false;
+
+    // Match optional plus or minus
+    let tok = match tok {
+        Some(Token::Minus) => {
+            negate = true;
+            tokens.next()
+        }
+        Some(Token::Plus) => {
+            negate = false;
+            tokens.next()
+        }
+        _ => tok,
+    };
+
+    let result = match tok {
+        Some(Token::Float(number)) => ExprTree::Float(number),
+        Some(Token::Symbol(name)) => ExprTree::Var(name),
+        Some(Token::Open) => {
+            let expr = expr_rule(tokens)?;
+            match tokens.next() {
+                Some(Token::Close) => expr,
+                Some(tok) => {
+                    return Err(Error::UnexpectedToken {
                         token: tok,
                         rule: "factor",
                         expect: "')'",
-                    }),
-                    None => Err(Error::UnexpectedEndOfInput {
+                    });
+                }
+                None => {
+                    return Err(Error::UnexpectedEndOfInput {
                         rule: "factor",
                         expect: "')'",
-                    }),
+                    });
                 }
             }
-            Some(tok) => Err(Error::UnexpectedToken {
+        }
+        Some(tok) => {
+            return Err(Error::UnexpectedToken {
                 token: tok,
                 rule: "factor",
                 expect: "number, variable, or '('",
-            }),
-            None => Err(Error::UnexpectedEndOfInput {
+            });
+        }
+        None => {
+            return Err(Error::UnexpectedEndOfInput {
                 rule: "factor",
                 expect: "number, variable, or '('",
-            }),
+            });
         }
     };
-    debug!("factor: leave with {:?}", result);
-    result
+
+    if negate {
+        Ok(ExprTree::Neg(Box::new(result)))
+    } else {
+        Ok(result)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -212,9 +227,22 @@ mod tests {
         env_logger::init();
 
         assert_eq!(parse("10"), Ok(Float(10.0)));
+        assert_eq!(parse("-10"), Ok(Neg(Box::new(Float(10.0)))));
         check("10+12", Add(Box::new(Float(10.0)), Box::new(Float(12.0))));
         check(
             "10+x",
+            Add(Box::new(Float(10.0)), Box::new(Var("x".to_string()))),
+        );
+
+        check(
+            "10+-x",
+            Add(
+                Box::new(Float(10.0)),
+                Box::new(Neg(Box::new(Var("x".to_string())))),
+            ),
+        );
+        check(
+            "10 + +x",
             Add(Box::new(Float(10.0)), Box::new(Var("x".to_string()))),
         );
         check(
@@ -251,11 +279,7 @@ mod tests {
         );
         assert_matches!(
             parse("10++"),
-            Err(UnexpectedToken {
-                token: Token::Plus,
-                rule: "factor",
-                ..
-            })
+            Err(UnexpectedEndOfInput { rule: "factor", .. })
         );
         assert_matches!(
             parse("10+("),

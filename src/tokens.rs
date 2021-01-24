@@ -18,7 +18,7 @@ pub enum Token {
 }
 
 impl std::fmt::Display for Token {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
             Token::Plus => write!(f, "+"),
             Token::Minus => write!(f, "-"),

@@ -1,14 +1,35 @@
 [package]
 name = "expr"
 version = "0.1.0"
-authors = ["mats@kindahl.net"]
+authors = ["Mats Kindahl <mats.kindahl@gmail.com>"]
+description = "Recursive descent expression parser with a focus on being fast, small, and simple to embed."
+documentation = "http://docs.rs/expr-rs"
+repository = "https://github.com/mkindahl/expr-rs"
+license = "Apache 2.0"
+keywords = ["expression", "parser"]
+edition = "2018"
+
+include = [
+  "Cargo.toml",
+  "LICENSE",
+  "src/**/*",
+]
 
 [dependencies]
-assert_matches = "~1.4"
+matches = "~0.1"
 
 [dev-dependencies]
 criterion = "~0.3"
 
 [[bench]]
 name = "simple"
+path = "benches/simple.rs"
 harness = false
+
+[[test]]
+name = "evaluation"
+path = "tests/evaluation.rs"
+
+[[test]]
+name = "parsing"
+path = "tests/parsing.rs"

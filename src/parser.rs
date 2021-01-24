@@ -1,7 +1,7 @@
 //! Predictive expression parse for expressions.
 
-use tokens::{Token, Tokenizer};
-use tree::ExprTree;
+use crate::tokens::{Token, Tokenizer};
+use crate::tree::ExprTree;
 
 /// Parse expression.
 ///
@@ -29,18 +29,17 @@ use tree::ExprTree;
 pub fn parse(text: &str) -> Result<ExprTree> {
     let mut tokens = Tokenizer::new(text);
     let tree = expr_rule(&mut tokens);
-    let result = match tokens.next() {
+    match tokens.next() {
         None => tree,
         Some(tok) => Err(Error::UnexpectedToken {
             token: tok,
             rule: "expr",
             expect: "end of input",
         }),
-    };
-    result
+    }
 }
 
-fn expr_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
+fn expr_rule(tokens: &mut Tokenizer<'_>) -> Result<ExprTree> {
     let mut tree = term_rule(tokens)?;
     while let Some(Token::Plus) | Some(Token::Minus) = tokens.peek() {
         let tok = tokens.next();
@@ -70,7 +69,7 @@ fn expr_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
     Ok(tree)
 }
 
-fn term_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
+fn term_rule(tokens: &mut Tokenizer<'_>) -> Result<ExprTree> {
     let mut tree = factor_rule(tokens)?;
     while let Some(Token::Star) | Some(Token::Slash) = tokens.peek() {
         let tok = tokens.next();
@@ -100,7 +99,7 @@ fn term_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
     Ok(tree)
 }
 
-fn factor_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
+fn factor_rule(tokens: &mut Tokenizer<'_>) -> Result<ExprTree> {
     let tok = tokens.next();
     let mut negate = false;
 
@@ -175,7 +174,7 @@ pub enum Error {
 }
 
 impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
             Error::UnexpectedEndOfInput {
                 ref rule,
@@ -211,7 +210,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[cfg(test)]
 mod tests {
-    use assert_matches::assert_matches;
+    use matches::assert_matches;
 
     use super::Error::*;
     use super::ExprTree::*;

@@ -1,4 +1,4 @@
-extern crate assert_matches;
+#![warn(rust_2018_idioms)]
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -34,7 +34,7 @@ impl std::error::Error for Error {
 }
 
 impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Error::Parser(ref err) => write!(f, "parse error: {}", err),
             Error::Eval(ref err) => write!(f, "eval error: {}", err),

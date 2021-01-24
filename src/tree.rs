@@ -36,7 +36,7 @@ impl ExprTree {
 }
 
 impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Error::NoValue(name) => write!(f, "variable '{}' has no value", name),
         }

@@ -1,11 +1,12 @@
 # expr-rs: recursive decent expression parser
 
 An implementation of an simple expression parser with a focus on being
-fast, simple to embed, and with a minimum of dependencies. The parser
-reads a string to build an expression tree. The tree can then be
-evaluated or inspected or manipulated.
+fast, compact, simple to embed, and with a minimum of
+dependencies. The parser reads a string to build an expression
+tree. The tree can then be evaluated, inspected, or manipulated.
 
-The grammar of expressions is straightforward:
+The grammar of expressions is straightforward and (currently) quite
+basic:
 
     expr   ::= `term` (("+" | "-") `term`)*
     term   ::= `factor` (("*" | "/") `factor`)*
@@ -13,7 +14,8 @@ The grammar of expressions is straightforward:
 
 The parser is implemented as a library to ensure that it can easily be
 embedded into other applications and only has dependencies on the
-standard library to be as lightweight as possible.
+standard library to be as lightweight as possible. A typical usage
+could be:
 
 ```rust
  use expr::parse;

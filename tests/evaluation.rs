@@ -1,12 +1,12 @@
-extern crate assert_matches;
 extern crate expr;
+extern crate matches;
 
-use assert_matches::assert_matches;
 use expr::eval;
 use expr::parser::Error::*;
 use expr::tokens::Token;
 use expr::tree::Error::*;
 use expr::Error::*;
+use matches::assert_matches;
 use std::collections::HashMap;
 
 #[test]

@@ -4,8 +4,6 @@ version = "0.1.0"
 authors = ["mats@kindahl.net"]
 
 [dependencies]
-env_logger = "~0.5"
-log = "~0.4"
 assert_matches = "~1.4"
 
 [dev-dependencies]

@@ -46,10 +46,8 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    pub fn peek(&self, rule: &str) -> Option<Token> {
-        let tok = self.clone().next();
-        debug!("{}: next is {:?}", rule, tok);
-        tok
+    pub fn peek(&self) -> Option<Token> {
+        self.clone().next()
     }
 
     #[allow(dead_code)]

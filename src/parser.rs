@@ -42,7 +42,7 @@ pub fn parse(text: &str) -> Result<ExprTree> {
 
 fn expr_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
     let mut tree = term_rule(tokens)?;
-    while let Some(Token::Plus) | Some(Token::Minus) = tokens.peek("expr") {
+    while let Some(Token::Plus) | Some(Token::Minus) = tokens.peek() {
         let tok = tokens.next();
         let rhs = term_rule(tokens)?;
         match tok {
@@ -72,7 +72,7 @@ fn expr_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
 
 fn term_rule(tokens: &mut Tokenizer) -> Result<ExprTree> {
     let mut tree = factor_rule(tokens)?;
-    while let Some(Token::Star) | Some(Token::Slash) = tokens.peek("term") {
+    while let Some(Token::Star) | Some(Token::Slash) = tokens.peek() {
         let tok = tokens.next();
         let rhs = factor_rule(tokens)?;
         match tok {
@@ -224,8 +224,6 @@ mod tests {
 
     #[test]
     fn good_parse() {
-        env_logger::init();
-
         assert_eq!(parse("10"), Ok(Float(10.0)));
         assert_eq!(parse("-10"), Ok(Neg(Box::new(Float(10.0)))));
         check("10+12", Add(Box::new(Float(10.0)), Box::new(Float(12.0))));
@@ -277,10 +275,21 @@ mod tests {
                 ..
             }) if num == 20.0
         );
+
         assert_matches!(
             parse("10++"),
             Err(UnexpectedEndOfInput { rule: "factor", .. })
         );
+
+        assert_matches!(
+            parse("10+++3"),
+            Err(UnexpectedToken {
+                token: Token::Float(_),
+                rule: "expr",
+                ..
+            })
+        );
+
         assert_matches!(
             parse("10+("),
             Err(UnexpectedEndOfInput { rule: "factor", .. })

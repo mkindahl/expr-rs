@@ -23,6 +23,11 @@ fn good_eval() {
     assert_eq!(eval("10 + 2 * 3", &map), Ok(16.0));
     assert_eq!(eval("(10 + 2) * 3", &map), Ok(36.0));
     assert_eq!(eval("(10-x)*3", &map), Ok(-6.0));
+    assert_eq!(eval("-x*3", &map), Ok(-36.0));
+    assert_eq!(eval("x*-3", &map), Ok(-36.0));
+    assert_eq!(eval("x--3", &map), Ok(15.0));
+    assert_eq!(eval("x-+3", &map), Ok(9.0));
+    assert_eq!(eval("2 / -4", &map), Ok(-0.5));
 }
 
 #[test]
@@ -45,21 +50,32 @@ fn bad_eval() {
         eval("((10 + x) * 2))", &map),
         Err(Parser(UnexpectedToken {
             token: Token::Close,
-            rule: "expr", ..
+            rule: "expr",
+            ..
         }))
     );
     assert_matches!(
         eval("x y", &map),
         Err(Parser(UnexpectedToken {
             token: Token::Symbol(_),
-            rule: "expr", ..
+            rule: "expr",
+            ..
         }))
     );
     assert_matches!(
         eval(")10 + x", &map),
         Err(Parser(UnexpectedToken {
             token: Token::Float(_),
-            rule: "expr", ..
+            rule: "expr",
+            ..
+        }))
+    );
+    assert_matches!(
+        eval("(10 + x", &map),
+        Err(Parser(UnexpectedEndOfInput {
+            expect: "')'",
+            rule: "factor",
+            ..
         }))
     );
 }

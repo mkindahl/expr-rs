@@ -5,6 +5,7 @@ on:
       - master
 jobs:
   build:
+    name: Build Crate
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -13,12 +14,14 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
   clippy:
+    name: Run Clippy on Crate
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Run clippy
       run: cargo clippy --verbose
   docker:
+    name: Build and check Dockerfile
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Repo

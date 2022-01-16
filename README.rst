@@ -1,20 +1,25 @@
-# expr-rs: recursive decent expression parser
+===========================================
+expr-rs: recursive decent expression parser
+===========================================
 
 An implementation of an simple expression parser with a focus on being
 fast, compact, simple to embed, and with a minimum of
 dependencies. The parser reads a string to build an expression
 tree. The tree can then be evaluated, inspected, or manipulated.
 
-## Grammar
+Grammar
+=======
 
 The grammar of expressions is straightforward and (currently) quite
 basic:
 
-    expr   ::= `term` (("+" | "-") `term`)*
-    term   ::= `factor` (("*" | "/") `factor`)*
-    factor ::= ("+" | "-")? (`number` | `variable` | "(" `expr` ")")
+.. productionlist::
+	expr: `term` (("+" | "-") `term`)*
+    term: `factor` (("*" | "/") `factor`)*
+    factor: ("+" | "-")? (`number` | `variable` | "(" `expr` ")")
 
-## Example
+Example
+=======
 
 The parser is implemented as a library to ensure that it can easily be
 embedded into other applications and only has dependencies on the
@@ -36,7 +41,8 @@ could be:
 A sample application that just evaluates the expression with optional
 assignments are provided with the package.
 
-## Docker image build
+Docker image build
+==================
 
 The repository includes a `Dockerfile` to build a docker image that
 runs the `expr` executable. It is mostly intended to be an example of

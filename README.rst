@@ -13,10 +13,11 @@ Grammar
 The grammar of expressions is straightforward and (currently) quite
 basic:
 
-.. productionlist::
-	expr: `term` (("+" | "-") `term`)*
-    term: `factor` (("*" | "/") `factor`)*
-    factor: ("+" | "-")? (`number` | `variable` | "(" `expr` ")")
+```ebnf
+Expr = Term, { ("+" | "-"), Term}
+Term = Factor, { ("*" | "/"), Factor}
+Factor = [ "+" | "-" ], ( Number | Variable | "(", Expr, ")" )
+```
 
 Example
 =======

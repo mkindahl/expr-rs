@@ -15,11 +15,9 @@ include = [
   "src/**/*",
 ]
 
-[dependencies]
-matches = "~0.1"
-
 [dev-dependencies]
 criterion = "~0.3"
+matches = "~0.1"
 
 [[bench]]
 name = "simple"
